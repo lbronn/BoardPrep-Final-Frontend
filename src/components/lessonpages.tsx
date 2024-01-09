@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import ReactPaginate from "react-paginate";
 import Lessons from "./Lessons";
+import axiosInstance from "../axiosInstance";
 
 interface Page {
   page_number: number;
@@ -17,8 +18,8 @@ const Materials: React.FC<MaterialsProps> = ({ lessonId }) => {
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
 
   useEffect(() => {
-    axios
-      .get(`http://127.0.0.1:8000/pages/${lessonId}/`)
+    axiosInstance
+      .get(`/pages/${lessonId}/`)
       .then((response) => {
         setPages(response.data);
         setCurrentPageIndex(0); // Reset to the first page when the lesson changes

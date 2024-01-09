@@ -3,10 +3,10 @@ import profileImage from "../assets/16.png";
 import "../styles/reply.scss";
 import { convertToPHTime } from "../functions";
 import { FaEllipsisV, FaSave } from "react-icons/fa";
-import axios from "axios";
 import { useAppSelector } from "../redux/hooks";
 import { selectUser } from "../redux/slices/authSlice";
 import { MdCancel } from "react-icons/md";
+import axiosInstance from "../axiosInstance";
 
 interface Comment {
   id: number;
@@ -35,7 +35,7 @@ function Reply({ comment, setComments }: ReplyProps) {
 
   const deleteComment = async () => {
     try {
-      await axios.delete(`http://localhost:8000/comments/${comment.id}/`);
+      await axiosInstance.delete(`/comments/${comment.id}/`);
       setComments((prevComments: Comment[]) =>
         prevComments.filter((currComment) => currComment.id !== comment.id)
       );
@@ -66,12 +66,9 @@ function Reply({ comment, setComments }: ReplyProps) {
       return;
     }
     try {
-      await axios.post(
-        `http://127.0.0.1:8000/comments/${comment.id}/update_content/`,
-        {
-          content: newContent,
-        }
-      );
+      await axiosInstance.post(`/comments/${comment.id}/update_content/`, {
+        content: newContent,
+      });
       setContent(newContent);
       setIsEditing(false);
       setError("");

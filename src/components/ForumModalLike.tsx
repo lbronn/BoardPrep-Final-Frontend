@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
-import '../styles/forumlike.scss';
-import { useAppSelector } from '../redux/hooks';
-import { selectUser } from '../redux/slices/authSlice';
-import ForumLikeCard from './ForumLikeCard';
-import axiosInstance from '../axiosInstance';
+import { useState, useEffect } from "react";
+import "../styles/forumlike.scss";
+import { useAppSelector } from "../redux/hooks";
+import { selectUser } from "../redux/slices/authSlice";
+import ForumLikeCard from "./ForumLikeCard";
+import axiosInstance from "../axiosInstance";
 
 interface ForumModalCommentProps {
   id: number;
@@ -22,7 +22,7 @@ function ForumModalLike({ id, closeModal }: ForumModalCommentProps) {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     try {
-      const res = await axiosInstance.post('http://127.0.0.1:8000/create/like/', {
+      const res = await axiosInstance.post("/create/like/", {
         post: id,
         user: user.token.id,
       });
@@ -35,9 +35,8 @@ function ForumModalLike({ id, closeModal }: ForumModalCommentProps) {
 
   const getLikes = async () => {
     try {
-      const res = await axiosInstance.get(`http://127.0.0.1:8000/get/like/?post=${id}`);
-      console.log('getting likes');
-
+      const res = await axiosInstance.get(`/get/like/?post=${id}`);
+      console.log("getting likes");
 
       setLikes(res.data);
       setCount(res.data.length);
@@ -64,7 +63,11 @@ function ForumModalLike({ id, closeModal }: ForumModalCommentProps) {
             />
           ))}
         </div>
-        <button type="submit" className="like-card-button" onClick={handleSubmit}>
+        <button
+          type="submit"
+          className="like-card-button"
+          onClick={handleSubmit}
+        >
           Like
         </button>
       </div>

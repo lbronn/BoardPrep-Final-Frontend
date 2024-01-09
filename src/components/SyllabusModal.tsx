@@ -1,7 +1,7 @@
 // SyllabusModal.js
 
 import React, { FormEvent, useRef } from "react";
-import axios from "axios";
+import axiosInstance from "../axiosInstance";
 
 interface Syllabus {
   syllabusId: string;
@@ -27,7 +27,7 @@ function SyllabusModal({
 
     try {
       console.log("course prop in SyllabusModal:", course);
-      const response = await axios.post("http://127.0.0.1:8000/syllabi/", {
+      const response = await axiosInstance.post("/syllabi/", {
         syllabus_id: syllabusId,
         course: course,
       });

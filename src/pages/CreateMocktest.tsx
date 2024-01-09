@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from "react-router-dom";
-import axios from 'axios';
 import axiosInstance from '../axiosInstance';
 import '../styles/createmocktest.scss';
 

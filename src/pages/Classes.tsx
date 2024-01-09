@@ -7,7 +7,6 @@ import "../styles/class.scss";
 import { useAppSelector } from "../redux/hooks";
 import { selectUser } from "../redux/slices/authSlice";
 import axiosInstance from "../axiosInstance";
-import { set } from "lodash";
 import AlertMessage from "../components/AlertMessage";
 
 interface Class {

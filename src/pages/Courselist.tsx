@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import CourseCard from "../components/Coursecard";
 import Searchbar from "../components/SearchBar";
 import "../styles/courselist.scss";

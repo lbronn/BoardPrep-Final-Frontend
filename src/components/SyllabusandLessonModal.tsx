@@ -1,5 +1,5 @@
 import React, { FormEvent, useRef } from "react";
-import axios from "axios";
+import axiosInstance from "../axiosInstance";
 
 interface SyllabusLessonModalProps {
   closeModal: () => void;
@@ -33,8 +33,8 @@ function SyllabusLessonModal({
 
     try {
       // First, send a request to the /syllabi/ endpoint
-      const syllabusResponse = await axios.post(
-        "http://127.0.0.1:8000/syllabi/",
+      const syllabusResponse = await axiosInstance.post(
+        "/syllabi/",
         syllabusPayload
       );
 
@@ -47,8 +47,8 @@ function SyllabusLessonModal({
           syllabus_id: syllabusResponse.data.id, // Use the ID from the syllabus response
         };
 
-        const lessonResponse = await axios.post(
-          "http://127.0.0.1:8000/lessons/",
+        const lessonResponse = await axiosInstance.post(
+          "/lessons/",
           lessonPayload
         );
 

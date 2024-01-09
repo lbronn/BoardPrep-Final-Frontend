@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
-import axios from "axios";
 import "../styles/mocktestresults.scss";
 import { useAppSelector } from "../redux/hooks";
 import { selectUser } from "../redux/slices/authSlice";
@@ -62,18 +61,18 @@ const MockTestResults = () => {
     setShowAssessment(true);
   };
 
-  const getUserDetails = async() => {
+  const getUserDetails = async () => {
     const userid = user.token.id;
-    const res = await axiosInstance.get('/get/user/', {
-        params: {
-          username: user.token.id,
-        },
-      });
+    const res = await axiosInstance.get("/get/user/", {
+      params: {
+        username: user.token.id,
+      },
+    });
     console.log(res.data);
-    if(res.data.is_premium) {
+    if (res.data.is_premium) {
       setIsPremium(true);
     }
-  }
+  };
 
   useEffect(() => {
     console.log("Mocktest Name:", mocktestName);
@@ -85,9 +84,7 @@ const MockTestResults = () => {
 
     if (mocktest_id && user.token.id) {
       axiosInstance
-        .get(
-          `/scores/?student_id=${user.token.id}&mocktest_id=${mocktest_id}`
-        )
+        .get(`/scores/?student_id=${user.token.id}&mocktest_id=${mocktest_id}`)
         .then((response) => {
           const resultData = response.data.length ? response.data[0] : null;
           console.log("Response Data:", resultData);
@@ -119,7 +116,10 @@ const MockTestResults = () => {
           setIsLoading(false);
         })
         .catch((error) => {
-          console.error('There was an error fetching the mock test results', error);
+          console.error(
+            "There was an error fetching the mock test results",
+            error
+          );
           setIsLoading(false);
         });
     }
@@ -131,7 +131,9 @@ const MockTestResults = () => {
 
   return (
     <div className="mocktest-results-container">
-      <h1 className="mocktest-title"><b>{result.mocktestName}</b> Results</h1>
+      <h1 className="mocktest-title">
+        <b>{result.mocktestName}</b> Results
+      </h1>
       <hr className="titleBar"></hr>
       <div className="mocktest-results">
         <div className="congratulations-box">
@@ -140,15 +142,27 @@ const MockTestResults = () => {
           </p>
         </div>
         <p className="score-message">
-          for finishing the mock test for <b>{result.mocktestName}</b> with a score of <b>{score}/{total}</b> taken on <i>{result.dateOfMocktest}</i>.
+          for finishing the mock test for <b>{result.mocktestName}</b> with a
+          score of{" "}
+          <b>
+            {score}/{total}
+          </b>{" "}
+          taken on <i>{result.dateOfMocktest}</i>.
         </p>
         <hr className="messageBar"></hr>
       </div>
       <div className="buttons-container">
-          { isPremium &&
-            <button className="view-assessment-btn" onClick={viewAssessmentHandler}>VIEW ASSESSMENT</button>
-          }
-          <button className="back-to-class-btn" onClick={handleBackToClass}>BACK TO CLASS</button>
+        {isPremium && (
+          <button
+            className="view-assessment-btn"
+            onClick={viewAssessmentHandler}
+          >
+            VIEW ASSESSMENT
+          </button>
+        )}
+        <button className="back-to-class-btn" onClick={handleBackToClass}>
+          BACK TO CLASS
+        </button>
       </div>
       {showAssessment && (
         <PerformanceAssessment

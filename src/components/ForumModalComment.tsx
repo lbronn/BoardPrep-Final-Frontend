@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
-import '../styles/forumcomment.scss';
-import { useAppSelector } from '../redux/hooks';
-import { selectUser } from '../redux/slices/authSlice';
-import ForumCommentCard from './ForumCommentCard';
-import axiosInstance from '../axiosInstance';
+import { useState, useEffect } from "react";
+import "../styles/forumcomment.scss";
+import { useAppSelector } from "../redux/hooks";
+import { selectUser } from "../redux/slices/authSlice";
+import ForumCommentCard from "./ForumCommentCard";
+import axiosInstance from "../axiosInstance";
 
 interface ForumModalCommentProps {
   id: number;
@@ -12,18 +12,18 @@ interface ForumModalCommentProps {
 
 function ForumModalComment({ id, closeModal }: ForumModalCommentProps) {
   const user = useAppSelector(selectUser);
-  const [comment, setComment] = useState('');
+  const [comment, setComment] = useState("");
   const [comments, setComments] = useState<any[]>([]);
 
   useEffect(() => {
     getComment();
-    console.log('key', id);
+    console.log("key", id);
   }, []);
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     try {
-      const res = await axiosInstance.post('http://127.0.0.1:8000/create/comment/', {
+      const res = await axiosInstance.post("/create/comment/", {
         post: id,
         author: user.token.id,
         content: comment,
@@ -37,8 +37,8 @@ function ForumModalComment({ id, closeModal }: ForumModalCommentProps) {
 
   const getComment = async () => {
     try {
-      const res = await axiosInstance.get(`http://127.0.0.1:8000/get/comment/?post=${id}`);
-      console.log('getting comments');
+      const res = await axiosInstance.get(`/get/comment/?post=${id}`);
+      console.log("getting comments");
       console.log(res.data);
       setComments(res.data);
     } catch (err) {
@@ -56,11 +56,14 @@ function ForumModalComment({ id, closeModal }: ForumModalCommentProps) {
           </span>
         </div>
         <div className="comment-cards">
-        {
-          comments.map((comment: any) => (
-            <ForumCommentCard key={comment.id} author={comment.author} dateCreate={comment.created_at} content={comment.content} />
-          ))
-        }
+          {comments.map((comment: any) => (
+            <ForumCommentCard
+              key={comment.id}
+              author={comment.author}
+              dateCreate={comment.created_at}
+              content={comment.content}
+            />
+          ))}
         </div>
         <form onSubmit={handleSubmit}>
           <textarea

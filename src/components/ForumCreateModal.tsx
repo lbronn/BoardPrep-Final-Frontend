@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import '../styles/class.scss';
-import { useAppSelector } from '../redux/hooks';
-import { selectUser } from '../redux/slices/authSlice';
-import axiosInstance from '../axiosInstance';
+import { useState } from "react";
+import "../styles/class.scss";
+import { useAppSelector } from "../redux/hooks";
+import { selectUser } from "../redux/slices/authSlice";
+import axiosInstance from "../axiosInstance";
 
 interface Posts {
   author: string;
@@ -19,21 +19,21 @@ interface ForumCreateProps {
 
 function ForumCreate({ closeModal, setPosts }: ForumCreateProps) {
   const user = useAppSelector(selectUser);
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
-  const [tags, setTags] = useState('');
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [tags, setTags] = useState("");
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     try {
-      const res = await axiosInstance.post('http://127.0.0.1:8000/create/post/', {
+      const res = await axiosInstance.post("/create/post/", {
         post: user.token.id,
         author: user.token.id,
         title,
         content,
         tags,
       });
-      const posts = await axiosInstance.get('http://127.0.0.1:8000/get/post/');
+      const posts = await axiosInstance.get("/get/post/");
       setPosts(posts.data);
       console.log(res.data);
       closeModal();

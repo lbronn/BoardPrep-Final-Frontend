@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import Post from "./Post";
 import "../styles/poststab.scss";
 import { MdOutlinePostAdd, MdSend } from "react-icons/md";
 import { useAppSelector } from "../redux/hooks";
 import { selectUser } from "../redux/slices/authSlice";
 import Loader from "./Loader";
+import axiosInstance from "../axiosInstance";
 
 interface Posts {
   id: number;
@@ -31,9 +31,7 @@ function PostsTab({ classId }: PostProps) {
     const fetchPosts = async () => {
       setIsLoading(true);
       try {
-        const response = await axios.get(
-          `http://127.0.0.1:8000/posts/?class_id=${classId}`
-        );
+        const response = await axiosInstance.get(`/posts/?class_id=${classId}`);
         setPosts(response.data);
         setIsLoading(false);
       } catch (err) {
@@ -50,7 +48,7 @@ function PostsTab({ classId }: PostProps) {
   const handleSendPost = async () => {
     try {
       if (newPostContent !== "") {
-        const response = await axios.post(`http://127.0.0.1:8000/posts/`, {
+        const response = await axiosInstance.post(`/posts/`, {
           content: newPostContent,
           class_instance: classId,
           teacher: user.token.id,
