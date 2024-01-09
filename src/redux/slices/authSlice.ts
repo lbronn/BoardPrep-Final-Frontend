@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import axios from "axios";
+import axiosInstance from "../../axiosInstance";
 
 interface Token {
   id: string;
@@ -66,7 +66,7 @@ const authSlice = createSlice({
     },
     setPathname: (state, action: PayloadAction<string>) => {
       state.pathname = action.payload;
-    }
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(signIn.pending, (state) => {
@@ -102,7 +102,7 @@ export const signIn = createAsyncThunk(
   "auth/signIn",
   async ({ username, password }: { username: string; password: string }) => {
     try {
-      const response = await axios.post("http://127.0.0.1:8000/login/user/", {
+      const response = await axiosInstance.post("/login/user/", {
         username: username,
         password: password,
       });
@@ -144,7 +144,7 @@ export const signUp = createAsyncThunk(
     lastname,
     email,
     specialization,
-    userType
+    userType,
   }: {
     username: string;
     password: string;
@@ -155,7 +155,7 @@ export const signUp = createAsyncThunk(
     specialization: string;
   }) => {
     try {
-      const response = await axios.post(`http://127.0.0.1:8000/register/${userType}/`, {
+      const response = await axiosInstance.post(`/register/${userType}/`, {
         user_name: username,
         password: password,
         email: email,
@@ -192,7 +192,8 @@ export const signUp = createAsyncThunk(
   }
 );
 
-export const { setUserFromLocalStorage, signOut, setPathname } = authSlice.actions;
+export const { setUserFromLocalStorage, signOut, setPathname } =
+  authSlice.actions;
 
 export const selectUser = (state: { auth: AuthState }) => state.auth;
 
