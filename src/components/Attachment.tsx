@@ -87,7 +87,8 @@ function Attachment({ attachment, setAttachments }: AttachmentProps) {
   const handleOpenLink = (e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
     if (attachment.file === null) openLink(attachment.link);
-    else downloadFile(`http://127.0.0.1:8000${attachment.file}`);
+    else
+      downloadFile(`${process.env.REACT_APP_BOARDPREP_API}${attachment.file}`);
   };
 
   return (

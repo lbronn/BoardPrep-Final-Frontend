@@ -21,7 +21,7 @@ function ClassCard({ class: classItem }: ClassCardProps) {
   return (
     <div className="class-card">
       <img
-        src={`http://127.0.0.1:8000${classItem.image}`}
+        src={`${process.env.REACT_APP_BOARDPREP_API}${classItem.image}`}
         className="logo"
         alt="RILL"
       />
