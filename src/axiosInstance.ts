@@ -7,6 +7,7 @@ const axiosInstance = axios.create({
       : "http://localhost:8000",
   headers: {
     "Access-Control-Allow-Credentials": true,
+    Origin: "https://boardprep.vercel.app",
   },
 });
 
