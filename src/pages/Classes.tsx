@@ -86,7 +86,7 @@ function Classes() {
         <AlertMessage
           message="Sent Join Request!"
           type="success"
-          onClose={() => setAlert(false)}
+          onClose={(isSuccess: boolean) => isSuccess && setAlert(false)}
         />
       )}
     </div>

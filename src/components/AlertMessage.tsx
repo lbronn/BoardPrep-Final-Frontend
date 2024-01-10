@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 interface AlertProps {
   message: string;
   type: string;
-  onClose: () => void;
+  onClose: (isSuccess: boolean) => void;
 }
 
 const AlertMessage: React.FC<AlertProps> = ({ message, type, onClose }) => {
@@ -21,7 +21,7 @@ const AlertMessage: React.FC<AlertProps> = ({ message, type, onClose }) => {
 
   const handleDismiss = () => {
     setShowAlert(false);
-    onClose();
+    onClose(true);
   };
 
   return showAlert ? (
