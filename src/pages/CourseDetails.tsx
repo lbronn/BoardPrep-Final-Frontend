@@ -364,7 +364,7 @@ function CourseDetails() {
     },
     mediaEmbed: mediaEmbedConfig,
     simpleUpload: {
-      uploadUrl: `http://localhost:8000/media/uploads/`,
+      uploadUrl: `${axiosInstance.defaults.baseURL}/media/uploads/`,
     },
     removePlugins: ["Markdown"],
   };
