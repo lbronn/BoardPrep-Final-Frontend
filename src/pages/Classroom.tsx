@@ -51,7 +51,11 @@ function Classroom() {
   useEffect(() => {
     const fetchClass = async () => {
       try {
-        let response = await axiosInstance.get(`/classes/${classId}/`);
+        let response = await axiosInstance.get(
+          `/join-requests/?class_id=${classId}`
+        );
+        setJoinRequests(response.data);
+        response = await axiosInstance.get(`/classes/${classId}/`);
         setClass(response.data);
         if (user.token.type === "T") {
           if (user.token.id !== response.data.teacher) {
@@ -68,10 +72,6 @@ function Classroom() {
             navigate(`/classes`);
           }
         }
-        response = await axiosInstance.get(
-          `/join-requests/?class_id=${classId}`
-        );
-        setJoinRequests(response.data);
       } catch (err) {
         console.error(err);
       }
