@@ -20,11 +20,7 @@ interface ClassCardProps {
 function ClassCard({ class: classItem }: ClassCardProps) {
   return (
     <div className="class-card">
-      <img
-        src={`${process.env.REACT_APP_BOARDPREP_API}${classItem.image}`}
-        className="logo"
-        alt="RILL"
-      />
+      <img src={`${classItem.image}`} className="logo" alt="RILL" />
       <div className="card-text">
         <div>
           <p className="card-title">{classItem.className}</p>
