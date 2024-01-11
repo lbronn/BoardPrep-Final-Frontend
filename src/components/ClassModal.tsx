@@ -18,7 +18,7 @@ interface Class {
 }
 
 interface ClassModalProps {
-  closeModal: () => void;
+  closeModal: (isJoin: boolean) => void;
   classes: Class[];
   setClasses: (classes: Class[]) => void;
 }
@@ -91,7 +91,7 @@ function ClassModal({ closeModal, classes, setClasses }: ClassModalProps) {
         });
 
         if (response.status === 201) {
-          closeModal();
+          closeModal(false);
           setClasses([...classes, response.data]);
         }
       } else {
@@ -110,7 +110,7 @@ function ClassModal({ closeModal, classes, setClasses }: ClassModalProps) {
         console.log("Response:", response);
 
         if (response.status === 201) {
-          closeModal();
+          closeModal(true);
         }
       }
     } catch (err) {
@@ -123,7 +123,7 @@ function ClassModal({ closeModal, classes, setClasses }: ClassModalProps) {
       <div className="modal-content">
         <div className="modal-header">
           <h1>{user.token.type === "T" ? "Create Class" : "Join Class"}</h1>
-          <span className="close" onClick={closeModal}>
+          <span className="close" onClick={() => closeModal(false)}>
             &times;
           </span>
         </div>

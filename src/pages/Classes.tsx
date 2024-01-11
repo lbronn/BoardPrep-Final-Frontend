@@ -48,9 +48,11 @@ function Classes() {
     setModalOpen(true);
   };
 
-  const closeModal = () => {
+  const closeModal = (isJoin: boolean) => {
     setModalOpen(false);
-    setAlert(true);
+    if (isJoin) {
+      setAlert(true);
+    }
   };
 
   return (
