@@ -12,7 +12,10 @@ import {
   PointElement,
   Tooltip,
   Legend,
-  LineController
+  LineController,
+  BarController,
+  ArcController,
+  PointController,
 } from "chart.js";
 import axiosInstance from "../axiosInstance";
 import "../styles/studentperformancemodal.scss";
@@ -27,7 +30,10 @@ ChartJS.register(
   PointElement,
   Tooltip,
   Legend,
-  LineController
+  LineController,
+  BarController,
+  ArcController,
+  PointController
 );
 
 interface Student {
