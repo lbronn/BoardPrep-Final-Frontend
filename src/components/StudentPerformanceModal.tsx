@@ -14,8 +14,6 @@ import {
   Legend,
   LineController,
   BarController,
-  ArcController,
-  PointController,
 } from "chart.js";
 import axiosInstance from "../axiosInstance";
 import "../styles/studentperformancemodal.scss";
@@ -31,9 +29,7 @@ ChartJS.register(
   Tooltip,
   Legend,
   LineController,
-  BarController,
-  ArcController,
-  PointController
+  BarController
 );
 
 interface Student {
