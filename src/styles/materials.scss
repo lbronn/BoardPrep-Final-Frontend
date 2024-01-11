@@ -42,6 +42,8 @@
     overflow: auto; /* Add this to handle overflowing content */
 
     .ck-content {
+      padding-left: 30px;
+      padding-right: 30px;
       margin-top: 30px;
         max-width: 100%; /* Ensure CKEditor content does not exceed the container */
         overflow: hidden; /* Hide the overflow or use 'auto' if you want scrollbars */
@@ -70,10 +72,6 @@
   }
 }
 
-.ck.ck-editor__editable{
-   padding-left: 30px;
-   padding-right: 30px;
-  }
 
 .pagination {
   display: flex;
