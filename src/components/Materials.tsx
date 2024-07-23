@@ -35,7 +35,7 @@ function Materials({ courseId }: MaterialsProps) {
     const fetchSyllabusAndFirstLesson = async () => {
       try {
         const syllabusResponse = await axiosInstance.get(
-          `/syllabi/${courseId}/`
+          `/syllabi/${courseId}/`,
         );
         const syllabusData = syllabusResponse.data[0];
         setLessons(syllabusData.lessons);
@@ -114,23 +114,25 @@ function Materials({ courseId }: MaterialsProps) {
       >
         <Syllabus lessons={lessons} onLessonClick={handleLessonClick} />
       </div>
+      <div className="box-content">
+        <div className="lesson-content-container">
+          {pages.length > 0 && (
+            <LessonContent content={pages[currentPage].content} />
+          )}
 
-      <div className="lesson-content-container">
-        {pages.length > 0 && (
-          <LessonContent content={pages[currentPage].content} />
-        )}
-
-        {pageCount > 1 && (
-          <ReactPaginate
-            previousLabel={currentPage > 0 ? "previous" : ""}
-            nextLabel={currentPage < pageCount - 1 ? "next" : ""}
-            breakLabel={"..."}
-            pageCount={pageCount}
-            onPageChange={handlePageClick}
-            containerClassName={"pagination"}
-            activeClassName={"active"}
-          />
-        )}
+          {pageCount > 1 && (
+            <ReactPaginate
+              previousLabel={currentPage > 0 ? "previous" : ""}
+              nextLabel={currentPage < pageCount - 1 ? "next" : ""}
+              breakLabel={"..."}
+              pageCount={pageCount}
+              onPageChange={handlePageClick}
+              containerClassName={"pagination"}
+              activeClassName={"active"}
+            />
+          )}
+        </div>
+        <button className="exercise-btn">Take Exercise</button>
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-@import './toggle.scss';
+@import "./toggle.scss";
 
 .materials-page {
   margin-top: 20px;
@@ -13,7 +13,9 @@
     margin-right: 2%;
     margin-left: 1%;
     margin-bottom: 1%;
-    transition: margin-left 0.3s, width 0.3s ease;
+    transition:
+      margin-left 0.3s,
+      width 0.3s ease;
     flex: 0 0 10%; // Make sure to set flex-basis to the width for consistency
     min-width: 200px;
     z-index: 10; // Corrected z-index without %
@@ -37,21 +39,25 @@
     margin-right: 5%;
     margin-bottom: 5%;
     padding: 50px;
-    transition: margin 0.3s ease, flex-basis 0.3s ease;
-    box-shadow: 11px 5px 9px 0px rgba(230,104,230,1), -1px -1px 10px rgb(144, 129, 129);
+    transition:
+      margin 0.3s ease,
+      flex-basis 0.3s ease;
+    box-shadow:
+      11px 5px 9px 0px rgba(230, 104, 230, 1),
+      -1px -1px 10px rgb(144, 129, 129);
     overflow: auto; /* Add this to handle overflowing content */
 
     .ck-content {
       padding-left: 30px;
       padding-right: 30px;
       margin-top: 30px;
-        max-width: 100%; /* Ensure CKEditor content does not exceed the container */
-        overflow: hidden; /* Hide the overflow or use 'auto' if you want scrollbars */
-        /* Other styles as needed */
-        @if color == hsl(0, 0%, 0%) { // Check if the color is black
-          color: #fff; // Change text color to white
-        }
-         
+      max-width: 100%; /* Ensure CKEditor content does not exceed the container */
+      overflow: hidden; /* Hide the overflow or use 'auto' if you want scrollbars */
+      /* Other styles as needed */
+      @if color == hsl(0, 0%, 0%) {
+        // Check if the color is black
+        color: #fff; // Change text color to white
+      }
     }
 
     .pagination {
@@ -60,10 +66,6 @@
       left: 50%;
       transform: translateX(-50%); // Center horizontally
     }
-
-
-
-    
   }
 
   &.collapsed .lesson-content-container {
@@ -71,7 +73,6 @@
     margin-left: 20px; // Remove the margin when sidebar is collapsed
   }
 }
-
 
 .pagination {
   display: flex;
@@ -92,7 +93,6 @@
     }
   }
 }
-
 
 .checkbox {
   display: none;
@@ -119,27 +119,28 @@
   }
 }
 
-  // This will move the toggle button inside the syllabus container when expande
+// This will move the toggle button inside the syllabus container when expande
 
 .bars {
   width: 100%;
   height: 4px;
   background-color: rgb(176, 92, 255);
   border-radius: 4px;
-  transition-duration: .5s;
+  transition-duration: 0.5s;
 }
 
 #bar2 {
-  transition-duration: .8s;
+  transition-duration: 0.8s;
 }
 
-#bar1, #bar3 {
+#bar1,
+#bar3 {
   width: 70%;
 }
 
 .checkbox:not(:checked) + .toggle .bars {
   position: absolute;
-  transition-duration: .5s;
+  transition-duration: 0.5s;
 }
 
 .checkbox:not(:checked) + .toggle #bar2 {
@@ -160,8 +161,33 @@
   transform: rotate(180deg);
 }
 
-  
-  // ... Rest of your existing styles
-  
+// ... Rest of your existing styles
 
+.exercise-btn {
+  background: #b62ab9;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 15px;
+  padding: 15px 50px;
+  font-size: 18px;
+  cursor: pointer;
+  display: block;
+  margin: 40px 0 0px;
+  transition:
+    background-color 0.3s,
+    color 0.3s,
+    cursor 0.3s;
+  position: relative;
 
+  &:hover {
+    background: #ffffff;
+    color: #b62ab9;
+  }
+}
+
+.box-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
