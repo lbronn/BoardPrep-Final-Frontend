@@ -3,6 +3,7 @@ import axios from "axios";
 import ReactPaginate from "react-paginate";
 import Syllabus from "./Syllabus";
 import LessonContent from "./Lessons";
+import ExerciseModal from "./exercise/ExerciseModal";
 import "../styles/materials.scss";
 import axiosInstance from "../axiosInstance";
 
@@ -29,6 +30,8 @@ function Materials({ courseId }: MaterialsProps) {
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [currentLesson, setCurrentLesson] = useState<string | null>(null);
   const [isSyllabusCollapsed, setIsSyllabusCollapsed] = useState(false);
+  const [takeExercise, setTakeExercise] = useState<boolean>(false);
+  const [lesson, setLesson] = useState<Lesson | undefined>(undefined);
   const pageCount = pages.length;
 
   useEffect(() => {
@@ -79,8 +82,8 @@ function Materials({ courseId }: MaterialsProps) {
     try {
       const response = await axiosInstance.get(`/pages/${lessonId}/`);
       setPages(response.data);
-      setCurrentPage(0);
     } catch (error) {
+      setCurrentPage(0);
       console.error("Error fetching pages:", error);
     }
   };
@@ -92,6 +95,24 @@ function Materials({ courseId }: MaterialsProps) {
 
   const handlePageClick = (event: { selected: number }) => {
     setCurrentPage(event.selected);
+  };
+
+  const handleTakeExercise = () => {
+    const foundLesson = lessons.find(
+      (lesson) => lesson.lesson_id === currentLesson,
+    );
+    if (foundLesson) {
+      setLesson(foundLesson);
+    } else {
+      setLesson(undefined);
+    }
+    setTakeExercise(true);
+    console.log(takeExercise);
+    console.log(lessons.find((lesson) => lesson.lesson_id === currentLesson));
+  };
+
+  const closeTakeExercise = () => {
+    setTakeExercise(false);
   };
 
   return (
@@ -132,7 +153,12 @@ function Materials({ courseId }: MaterialsProps) {
             />
           )}
         </div>
-        <button className="exercise-btn">Take Exercise</button>
+        <button className="exercise-btn" onClick={handleTakeExercise}>
+          Take Exercise
+        </button>
+        {takeExercise && (
+          <ExerciseModal closeModal={closeTakeExercise} lesson={lesson} />
+        )}
       </div>
     </div>
   );

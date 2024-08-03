@@ -1,0 +1,49 @@
+$card-border-color: #ddd;
+$card-bg-color: #331c50; // Matching modal content background
+$choice-bg-color: #f4f4f4;
+$choice-hover-bg-color: #e0e0e0;
+$focus-outline-color: #6c63ff; // Matching color with modal
+
+.question-card {
+  border: 1px solid $card-border-color;
+  border-radius: 8px;
+  padding: 20px;
+  width: 100%;
+  max-width: 900px; // Match modal max-width
+  margin: 10px auto;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: $card-bg-color;
+
+  h2 {
+    font-size: 1.5rem;
+    margin-bottom: 12px;
+  }
+
+  p {
+    font-size: 1.125rem; // Slightly larger font size
+    margin-bottom: 15px;
+  }
+
+  .choices-form {
+    display: flex;
+    flex-direction: column;
+
+    .choice-item {
+      display: flex;
+      align-items: center;
+
+      input[type="radio"] {
+        margin-right: 10px;
+      }
+
+      label {
+        font-size: 1.125rem; // Slightly larger font size
+        cursor: pointer;
+
+        &:focus {
+          outline: 2px solid $focus-outline-color; // Matching focus outline
+        }
+      }
+    }
+  }
+}
