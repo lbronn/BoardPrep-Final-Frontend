@@ -1,25 +1,23 @@
 import React, { useState } from "react";
 import "../../styles/exercise.scss";
-import QuestionCard from "./QuestionCard";
+import QuestionList from "./QuestionList";
 
-interface Posts {
-  author: string;
-  dateCreate: string;
-  title: string;
+interface Page {
   content: string;
-  tags: string;
 }
+
 interface Lesson {
   lesson_id: string;
   lesson_title: string;
   order: number;
   content: string;
   syllabus: string;
+  pages: Page[];
 }
 
 interface ExerciseProps {
   closeModal: () => void;
-  lesson: Lesson | undefined;
+  lesson?: Lesson | undefined;
 }
 
 const sampleQuestions = [
@@ -75,30 +73,46 @@ const sampleQuestions = [
   },
 ];
 
-const handleSubmit = (event: React.FormEvent) => {
-  event.preventDefault();
-  console.log("Form Submitted");
-};
-
 function ExerciseModal({ closeModal, lesson }: ExerciseProps) {
+  const extractLessonTitle = (content: string = "") => {
+    const titleMatch = content.match(/<h1>(.*?)<\/h1>/);
+    return titleMatch ? titleMatch[1] : null;
+  };
+
+  const [answers, setAnswers] = useState<{ [key: number]: string | null }>({});
+
+  const title = extractLessonTitle(lesson?.pages[0].content);
+
+  const handleAnswerChange = (
+    questionNumber: number,
+    selectedChoice: string,
+  ) => {
+    setAnswers((prevAnswers) => ({
+      ...prevAnswers,
+      [questionNumber]: selectedChoice,
+    }));
+  };
+
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    console.log("Form Submitted", answers);
+  };
+
   return (
     <div id="modal" className="modal">
       <div className="modal-content">
         <div className="modal-header">
-          <h1 className="title">{lesson?.lesson_title}</h1>
+          <h2 className="title">{title}</h2>
           <span className="close title" onClick={closeModal}>
             &times;
           </span>
         </div>
         <form onSubmit={handleSubmit}>
-          {sampleQuestions.map((q) => (
-            <QuestionCard
-              key={q.number}
-              number={q.number}
-              question={q.question}
-              choices={q.choices}
-            />
-          ))}
+          <QuestionList
+            questions={sampleQuestions}
+            onAnswerChange={handleAnswerChange}
+            answers={answers}
+          />
           <button type="submit">Submit</button>
         </form>
       </div>

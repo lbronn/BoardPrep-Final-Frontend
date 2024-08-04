@@ -1,23 +1,31 @@
-import { useState, ChangeEvent } from "react";
+import { useState, ChangeEvent, useEffect } from "react";
 import "../../styles/question.scss";
 
 interface QuestionCardProps {
   number: number;
   question: string;
   choices: string[];
+  onAnswerChange: (questionNumber: number, selectedChoice: string) => void;
+  selectedChoice: string;
 }
 
-function QuestionCard({ number, question, choices }: QuestionCardProps) {
-  const [selectedChoice, setSelectedChoice] = useState<string | null>(null);
+function QuestionCard({
+  number,
+  question,
+  choices,
+  onAnswerChange,
+  selectedChoice,
+}: QuestionCardProps) {
+  const [internalChoice, setInternalChoice] = useState<string>(selectedChoice);
+
+  useEffect(() => {
+    setInternalChoice(selectedChoice);
+  }, [selectedChoice]);
 
   const handleChoiceChange = (event: ChangeEvent<HTMLInputElement>) => {
     const choice = event.target.value;
-
-    if (choice) {
-      setSelectedChoice(choice);
-    } else {
-      setSelectedChoice(null);
-    }
+    setInternalChoice(choice);
+    onAnswerChange(number, choice);
   };
 
   return (
@@ -25,13 +33,13 @@ function QuestionCard({ number, question, choices }: QuestionCardProps) {
       <p>
         {number}. {question}
       </p>
-      <form className="choices-form">
+      <div className="choices-form">
         {choices.map((choice, index) => (
           <div key={index} className="choice-item">
             <input
               type="radio"
-              id={`choice-${index}`}
-              name="choice"
+              id={`choice-${number}-${index}`}
+              name={`question-${number}`}
               value={choice}
               checked={selectedChoice === choice}
               onChange={handleChoiceChange}
@@ -39,7 +47,7 @@ function QuestionCard({ number, question, choices }: QuestionCardProps) {
             <label htmlFor={`choice-${index}`}>{choice}</label>
           </div>
         ))}
-      </form>
+      </div>
     </div>
   );
 }

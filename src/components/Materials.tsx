@@ -18,6 +18,7 @@ interface Lesson {
   order: number;
   content: string;
   syllabus: string;
+  pages: [];
 }
 
 interface MaterialsProps {
