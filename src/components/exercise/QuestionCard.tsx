@@ -36,15 +36,17 @@ function QuestionCard({
       <div className="choices-form">
         {choices.map((choice, index) => (
           <div key={index} className="choice-item">
-            <input
-              type="radio"
-              id={`choice-${number}-${index}`}
-              name={`question-${number}`}
-              value={choice}
-              checked={selectedChoice === choice}
-              onChange={handleChoiceChange}
-            />
-            <label htmlFor={`choice-${index}`}>{choice}</label>
+            <div className="custom-radio">
+              <input
+                type="radio"
+                id={`choice-${number}-${index}`}
+                name={`question-${number}`}
+                value={choice}
+                checked={selectedChoice === choice}
+                onChange={handleChoiceChange}
+              />
+              <label htmlFor={`choice-${number}-${index}`}>{choice}</label>
+            </div>
           </div>
         ))}
       </div>

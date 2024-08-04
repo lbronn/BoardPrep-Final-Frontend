@@ -1,6 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import "../../styles/exercise.scss";
 import QuestionList from "./QuestionList";
+import { useDispatch } from 'react-redux';
+import { useAppSelector } from "../../redux/hooks";
+import { selectUser } from '../../redux/slices/authSlice';
+import axiosInstance from '../../axiosInstance';
 
 interface Page {
   content: string;
@@ -79,9 +83,56 @@ function ExerciseModal({ closeModal, lesson }: ExerciseProps) {
     return titleMatch ? titleMatch[1] : null;
   };
 
+  const user = useAppSelector(selectUser);
+  const userType = user.token.type;
+  const [timeRemaining, setTimeRemaining] = useState(2700);
+  const intervalId = useRef<NodeJS.Timeout | null>(null);
   const [answers, setAnswers] = useState<{ [key: number]: string | null }>({});
 
   const title = extractLessonTitle(lesson?.pages[0].content);
+
+  const clearTimer = useCallback(() => {
+    console.log("Clearing timer...");
+    if (intervalId.current) clearInterval(intervalId.current);
+    localStorage.removeItem('exerciseStartTime');
+  }, []);
+
+  useEffect(() => {
+    const calculateTimeRemaining = () => {
+      const startTime = localStorage.getItem('exerciseStartTime');
+      if (startTime) {
+        const elapsedSeconds = Math.floor((Date.now() - parseInt(startTime)) / 1000);
+        return Math.max(2700 - elapsedSeconds, 0);
+      } else {
+        const now = Date.now();
+        localStorage.setItem('exerciseStartTime', now.toString());
+        return 2700;
+      }
+    };
+
+    setTimeRemaining(calculateTimeRemaining());
+
+    intervalId.current = setInterval(() => {
+      setTimeRemaining(calculateTimeRemaining());
+    }, 1000);
+
+    return () => {
+      if (intervalId.current) clearInterval(intervalId.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (timeRemaining <= 0) {
+      clearInterval(intervalId.current!);
+      localStorage.removeItem('exerciseStartTime');
+    }
+  }, [timeRemaining]);
+
+  const formatTime = () => {
+    const minutes = Math.floor(timeRemaining / 60);
+    const seconds = timeRemaining % 60;
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  };
 
   const handleAnswerChange = (
     questionNumber: number,
@@ -96,6 +147,7 @@ function ExerciseModal({ closeModal, lesson }: ExerciseProps) {
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     console.log("Form Submitted", answers);
+    clearTimer();
   };
 
   return (
@@ -103,17 +155,20 @@ function ExerciseModal({ closeModal, lesson }: ExerciseProps) {
       <div className="modal-content">
         <div className="modal-header">
           <h2 className="title">{title}</h2>
-          <span className="close title" onClick={closeModal}>
+          <span className="close-title" onClick={closeModal}>
             &times;
           </span>
         </div>
+        {userType === 'S' && (
+          <div className="exam-timer"> Timer: {formatTime()} </div>
+        )}
         <form onSubmit={handleSubmit}>
           <QuestionList
             questions={sampleQuestions}
             onAnswerChange={handleAnswerChange}
             answers={answers}
           />
-          <button type="submit">Submit</button>
+          <button type="submit">SUBMIT</button>
         </form>
       </div>
     </div>

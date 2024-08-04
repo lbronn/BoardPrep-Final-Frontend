@@ -5,6 +5,8 @@ import Syllabus from "./Syllabus";
 import LessonContent from "./Lessons";
 import ExerciseModal from "./exercise/ExerciseModal";
 import "../styles/materials.scss";
+import { useAppSelector } from "../redux/hooks";
+import { selectUser } from '../redux/slices/authSlice';
 import axiosInstance from "../axiosInstance";
 
 interface Page {
@@ -34,6 +36,8 @@ function Materials({ courseId }: MaterialsProps) {
   const [takeExercise, setTakeExercise] = useState<boolean>(false);
   const [lesson, setLesson] = useState<Lesson | undefined>(undefined);
   const pageCount = pages.length;
+  const user = useAppSelector(selectUser);
+  const userType = user.token.type;
 
   useEffect(() => {
     const fetchSyllabusAndFirstLesson = async () => {
@@ -154,9 +158,11 @@ function Materials({ courseId }: MaterialsProps) {
             />
           )}
         </div>
-        <button className="exercise-btn" onClick={handleTakeExercise}>
-          Take Exercise
-        </button>
+        {userType === 'S' && (
+          <button className="exercise-btn" onClick={handleTakeExercise}>
+            Take Exercise
+          </button>
+        )}
         {takeExercise && (
           <ExerciseModal closeModal={closeTakeExercise} lesson={lesson} />
         )}

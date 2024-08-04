@@ -1,3 +1,9 @@
+@import url('https://fonts.googleapis.com/css?family=Montserrat');
+
+* {
+  font-family: "Montserrat", sans-serif;
+}
+
 .modal {
   position: fixed;
   top: 0;
@@ -18,26 +24,52 @@
   padding: 20px;
   border-radius: 14px;
   width: 90%;
-  max-width: 900px;
+  max-width: 1000px;
   max-height: 90vh;
   z-index: 1000;
   overflow-y: auto;
 
+  .exam-timer {
+    background: #B62AB9;
+    color: white;
+    font-weight: bold;
+    padding: 10px 20px 10px 25px;
+    width: 145px;
+    border-radius: 20px;
+    position: absolute;
+    top: 32px;
+    right: 70px;
+  }
+
   button {
-    color: #ffffff;
-    width: 100px;
-    height: 34px;
-    border-radius: 5px;
-    background: #b650f4;
-    margin-left: auto;
+    color: #FFFFFF;
+    font-weight: bold;
+    font-size: 15px;
+    width: 120px;
+    height: 40px;
+    border-radius: 10px;
+    background: #B62AB9;
+    margin-right: 25px;
     cursor: pointer;
     border: none;
+
+    &:hover {
+      background: #FFFFFF;
+      font-weight: bold;
+      color: #B62AB9;
+    }
   }
 }
 
-.close {
-  font-size: 30px;
+.close-title {
+  margin-top: 2px;
+  font-size: 50px;
   cursor: pointer;
+
+  &:hover {
+    color: #B62AB9;
+    font-weight: bold;
+  }
 }
 
 .modal-header {
