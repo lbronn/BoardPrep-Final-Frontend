@@ -5,8 +5,11 @@ import { useDispatch } from 'react-redux';
 import { useAppSelector } from "../../redux/hooks";
 import { selectUser } from '../../redux/slices/authSlice';
 import axiosInstance from '../../axiosInstance';
+import ScoreModal from "./ScoreModal";
+import { set } from "lodash";
 
 interface Page {
+  id: string;
   content: string;
 }
 
@@ -22,62 +25,21 @@ interface Lesson {
 interface ExerciseProps {
   closeModal: () => void;
   lesson?: Lesson | undefined;
+  questions: Question[];
+  exerciseId: string | null;
 }
 
-const sampleQuestions = [
-  {
-    number: 1,
-    question: "What is the capital of France?",
-    choices: ["Paris", "London", "Rome", "Berlin"],
-  },
-  {
-    number: 2,
-    question: "What is the capital of Spain?",
-    choices: ["Madrid", "Barcelona", "Valencia", "Seville"],
-  },
-  {
-    number: 3,
-    question: "What is the capital of Italy?",
-    choices: ["Rome", "Milan", "Naples", "Turin"],
-  },
-  {
-    number: 4,
-    question: "What is the capital of Germany?",
-    choices: ["Berlin", "Munich", "Frankfurt", "Hamburg"],
-  },
-  {
-    number: 5,
-    question: "What is the capital of Portugal?",
-    choices: ["Lisbon", "Porto", "Braga", "Coimbra"],
-  },
-  {
-    number: 6,
-    question: "What is the capital of Netherlands?",
-    choices: ["Amsterdam", "Rotterdam", "Utrecht", "The Hague"],
-  },
-  {
-    number: 7,
-    question: "What is the capital of Belgium?",
-    choices: ["Brussels", "Antwerp", "Ghent", "Bruges"],
-  },
-  {
-    number: 8,
-    question: "What is the capital of Austria?",
-    choices: ["Vienna", "Salzburg", "Innsbruck", "Graz"],
-  },
-  {
-    number: 9,
-    question: "What is the capital of Switzerland?",
-    choices: ["Bern", "Zurich", "Geneva", "Basel"],
-  },
-  {
-    number: 10,
-    question: "What is the capital of Norway?",
-    choices: ["Oslo", "Bergen", "Trondheim", "Stavanger"],
-  },
-];
+interface Question {
+  id: number;
+  question: string;
+  choiceA: string;
+  choiceB: string;
+  choiceC: string;
+  choiceD: string;
+  correctAnswer: string;
+}
 
-function ExerciseModal({ closeModal, lesson }: ExerciseProps) {
+const ExerciseModal: React.FC<ExerciseProps> = ({ closeModal, questions, lesson, exerciseId }) => {
   const extractLessonTitle = (content: string = "") => {
     const titleMatch = content.match(/<h1>(.*?)<\/h1>/);
     return titleMatch ? titleMatch[1] : null;
@@ -85,28 +47,40 @@ function ExerciseModal({ closeModal, lesson }: ExerciseProps) {
 
   const user = useAppSelector(selectUser);
   const userType = user.token.type;
-  const [timeRemaining, setTimeRemaining] = useState(2700);
+  const userID = user.token.id;
+  const [timeRemaining, setTimeRemaining] = useState(1800);
   const intervalId = useRef<NodeJS.Timeout | null>(null);
-  const [answers, setAnswers] = useState<{ [key: number]: string | null }>({});
-
   const title = extractLessonTitle(lesson?.pages[0].content);
+  const lessonId = lesson?.lesson_id ?? "defaultLessonId";
+  const [studentName, setStudentName] = useState<string>();
+  const [exerciseDateTaken, setExerciseDateTaken] = useState<string>();
+  const [showScoreModal, setShowScoreModal] = useState(false);
+  const [feedbackMessage, setFeedbackMessage] = useState<string>("");
+  const [score, setScore] = useState<{ total: number; actual: number }>({ total: 0, actual: 0 });
+  const [correctAnswers, setCorrectAnswers] = useState<{ index: number; questionId: number; correctAnswer: string; studentAnswer: string | null }[]>([]);
+
+  const [answers, setAnswers] = useState<{ [key: number]: string | null }>(() =>
+    questions.reduce((acc, question) => {
+      acc[question.id] = null;
+      return acc;
+    }, {} as { [key: number]: string | null })
+  );
 
   const clearTimer = useCallback(() => {
-    console.log("Clearing timer...");
     if (intervalId.current) clearInterval(intervalId.current);
-    localStorage.removeItem('exerciseStartTime');
-  }, []);
+    localStorage.removeItem(`exerciseStartTime-${lessonId}`);
+  }, [lessonId]);
 
   useEffect(() => {
     const calculateTimeRemaining = () => {
-      const startTime = localStorage.getItem('exerciseStartTime');
+      const startTime = localStorage.getItem(`exerciseStartTime-${lessonId}`);
       if (startTime) {
         const elapsedSeconds = Math.floor((Date.now() - parseInt(startTime)) / 1000);
-        return Math.max(2700 - elapsedSeconds, 0);
+        return Math.max(1800 - elapsedSeconds, 0);
       } else {
         const now = Date.now();
-        localStorage.setItem('exerciseStartTime', now.toString());
-        return 2700;
+        localStorage.setItem(`exerciseStartTime-${lessonId}`, now.toString());
+        return 1800;
       }
     };
 
@@ -119,14 +93,14 @@ function ExerciseModal({ closeModal, lesson }: ExerciseProps) {
     return () => {
       if (intervalId.current) clearInterval(intervalId.current);
     };
-  }, []);
+  }, [lessonId]);
 
   useEffect(() => {
     if (timeRemaining <= 0) {
       clearInterval(intervalId.current!);
-      localStorage.removeItem('exerciseStartTime');
+      localStorage.removeItem(`exerciseStartTime-${lessonId}`);
     }
-  }, [timeRemaining]);
+  }, [timeRemaining, lessonId]);
 
   const formatTime = () => {
     const minutes = Math.floor(timeRemaining / 60);
@@ -138,16 +112,71 @@ function ExerciseModal({ closeModal, lesson }: ExerciseProps) {
     questionNumber: number,
     selectedChoice: string,
   ) => {
-    setAnswers((prevAnswers) => ({
-      ...prevAnswers,
-      [questionNumber]: selectedChoice,
-    }));
+    setAnswers((prevAnswers) => {
+      const updatedAnswers = { ...prevAnswers, [questionNumber]: selectedChoice };
+      console.log("Updated Answers: ", updatedAnswers);
+      return updatedAnswers;
+    });
   };
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const calculateScore = () => {
+    let actualScore = 0;
+    questions.forEach((question) => {
+      if (answers[question.id] === question.correctAnswer) {
+        actualScore++;
+      }
+    });
+    return { total: questions.length, actual: actualScore };
+  };
+
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    console.log("Form Submitted", answers);
     clearTimer();
+    const { total, actual } = calculateScore();
+    const dateTaken = new Date().toISOString().split('T')[0]; 
+
+    const correctAnswersData = questions.map((question, index) => ({
+      index: (index - 1) + 1,
+      questionId: question.id,
+      correctAnswer: question.correctAnswer,
+      studentAnswer: answers[question.id],
+    }));
+
+    setCorrectAnswers(correctAnswersData);
+
+    const payload = {
+      student_id: userID,
+      exercise_id: exerciseId,
+      score: actual,
+      totalQuestions: total,
+      exerciseDateTaken: dateTaken,
+      feedback: "annyeong",
+      correct_answers: correctAnswersData,
+      lesson_id: lesson?.lesson_id, 
+      page_id: lesson?.pages[0]?.id, 
+    };
+
+    try {
+      const response = await axiosInstance.post(`/exercise-scores/${exerciseId}/`, payload);
+      const { studentName } = response.data;
+      setScore({ total, actual }); 
+      setShowScoreModal(true);
+      setStudentName(studentName);
+      setExerciseDateTaken(dateTaken);
+      setFeedbackMessage(feedbackMessage);
+      console.log(feedbackMessage);
+    } catch (error) {
+      console.error("Error submitting score:", error);
+    }
+  };
+
+  const closeScoreModal = () => {
+    setShowScoreModal(false);
+    closeModal();
+  };
+
+  const unlockNextLesson = () => {
+    console.log("Next lesson unlocked!");
   };
 
   return (
@@ -164,15 +193,27 @@ function ExerciseModal({ closeModal, lesson }: ExerciseProps) {
         )}
         <form onSubmit={handleSubmit}>
           <QuestionList
-            questions={sampleQuestions}
+            questions={questions}
             onAnswerChange={handleAnswerChange}
             answers={answers}
           />
           <button type="submit">SUBMIT</button>
         </form>
       </div>
+      {showScoreModal && (
+        <ScoreModal 
+          closeModal={closeScoreModal} 
+          feedback={feedbackMessage}
+          score={score} 
+          lesson={lesson} 
+          correctAnswers={correctAnswers} 
+          studentName={studentName} 
+          exerciseDateTaken={exerciseDateTaken}
+          unlockNextLesson={unlockNextLesson}
+        />
+      )}
     </div>
   );
-}
+};
 
 export default ExerciseModal;

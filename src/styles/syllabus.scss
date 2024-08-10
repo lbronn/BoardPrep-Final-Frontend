@@ -35,7 +35,7 @@
 
         }
 
-        .title-container{
+        .title-container {
             font-family: "Montserrat", sans-serif;
             margin-top: 5px;
             transform: translate(5.5%, 20%);
@@ -44,18 +44,26 @@
             background-color: #080420;
             border-radius: 15px;
             margin-bottom: 20px;
-
-            h2{
-                padding-top: 20px;
-                font-size: 20px;
-                color: #f5f4f4;
-                text-align: center;
+            cursor: pointer;
+          
+            h2 {
+              padding-top: 20px;
+              font-size: 20px;
+              color: #f5f4f4;
+              text-align: center;
             }
+          
             &:hover {
-                transition: 0.5s;
-                background-color: #7D67FF;
-                color: #000;
+              transition: 0.5s;
+              background-color: #7D67FF;
+              cursor: pointer;
             }
+        }
+
+        .title-container.locked {
+            opacity: 0.5;            // Dimmed appearance for locked lessons
+            cursor: not-allowed;     // Disable cursor
+            pointer-events: none;    // Disable interaction
         }
 
         p {

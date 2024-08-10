@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
 import "../styles/syllabus.scss";
 import { useAppSelector } from "../redux/hooks";
 import { selectUser } from "../redux/slices/authSlice";
 import axiosInstance from "../axiosInstance";
+import ScoreModal from "./exercise/ScoreModal";
 
 interface Lessons {
   order: number;
@@ -32,10 +32,13 @@ function Syllabus({ syllabus = [], lessons, onLessonClick }: SyllabusProps) {
   const [currentLessonContent, setCurrentLessonContent] = useState("");
   const [loadingContent, setLoadingContent] = useState(false);
   const [error, setError] = useState("");
+  const [passedLessons, setPassedLessons] = useState<{ [key: string]: Set<string> }>({});
   const user = useAppSelector(selectUser);
   const userType = user.token.type;
-  const { courseId } = useParams<{
+  const userID = user.token.id;
+  const { courseId, lessonId } = useParams<{
     courseId: string;
+    lessonId: string;
   }>();
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
   const [courseIdForUser, setCourseIdForUser] = useState<string | null>(null);
@@ -49,6 +52,13 @@ function Syllabus({ syllabus = [], lessons, onLessonClick }: SyllabusProps) {
   const classPath = window.location.pathname;
   console.log(classPath.split("/")[2]);
   const classId = classPath.split("/")[2];
+
+  const unlockNextLesson = (lessonId: string) => {
+    setPassedLessons(prev => ({
+      ...prev,
+      [classId]: new Set([...(prev[classId] ? Array.from(prev[classId]) : []), lessonId])
+    }));
+  };
 
   const onClickMockTest = () => {
     const path = userType === 'S' || userType === 'T' ? `/classes/${classId}/mocktest/${courseIdForUser}` : `/courses/${courseId}/mocktest/create`;
@@ -85,6 +95,44 @@ function Syllabus({ syllabus = [], lessons, onLessonClick }: SyllabusProps) {
       setLoadingContent(false);
     }
   };
+
+  useEffect(() => {
+    const fetchExerciseScores = async () => {
+        try {
+            console.log(classId);
+            const scoresResponse = await axiosInstance.get(`/exercise-scores/`);
+            const exerciseScores = scoresResponse.data;
+            console.log('Exercise Scores:', exerciseScores);
+
+            const exerciseResponse = await axiosInstance.get(`/exercises/`);
+            const exercises = exerciseResponse.data;
+            console.log('Exercises:', exercises);
+
+            const passedLessonsSet = new Set<string>();
+            for (const score of exerciseScores) {
+                if (score.student === userID && score.score >= 10) {
+                    const matchingExercise = exercises.find((exercise: { exerciseID: any; lesson: string; }) => exercise.exerciseID === score.exercise_id);
+                    if (matchingExercise) {
+                        const lessonTest = matchingExercise.lesson;
+                        console.log('Lesson:', lessonTest);
+                        passedLessonsSet.add(lessonTest);
+                    }
+                }
+            }
+
+            console.log('Passed Lessons:', Array.from(passedLessonsSet));
+            setPassedLessons(prev => ({
+              ...prev,
+              [classId]: passedLessonsSet,
+            }));
+        } catch (error) {
+            console.error('Error fetching exercise scores or exercises:', error);
+        }
+    };
+
+    setPassedLessons({});
+    fetchExerciseScores();
+  }, [userID, classId]);
 
   useEffect(() => {
     const fetchCourseDataForUser = async () => {
@@ -132,23 +180,35 @@ function Syllabus({ syllabus = [], lessons, onLessonClick }: SyllabusProps) {
     fetchCourseData();
   }, []);
 
+  const isLessonUnlocked = (index: number) => {
+    return index === 0 || (passedLessons[classId]?.has(lessons[index - 1]?.lesson_id));
+  };
+
   return (
     <div className="syllabus-container">
-      {lessons.map((lesson) => (
+      {lessons.map((lesson, index) => (
         <div
           key={lesson.lesson_id}
-          className="title-container"
-          onClick={() => onLessonClick(lesson.lesson_id)}
+          className={`title-container ${userType === "S" && !isLessonUnlocked(index) ? "locked" : ""}`}
+          onClick={userType !== "S" || isLessonUnlocked(index) ? () => onLessonClick(lesson.lesson_id) : undefined}
           role="button"
           tabIndex={0}
         >
-          <h2>{lesson.lesson_title}</h2>
+          <h2>{lesson.lesson_title}
+            {userType === "S" && !isLessonUnlocked(index) && ' 🔒'}
+          </h2>
         </div>
       ))}
-      <div className="title-container" tabIndex={0} onClick={onClickMockTest}>
+      <div 
+        className={`title-container ${userType === "S" && passedLessons[classId]?.size !== lessons.length ? "locked" : ""}`}
+        tabIndex={0}
+        onClick={userType !== "S" || passedLessons[classId]?.size === lessons.length ? onClickMockTest : undefined}
+      >
         <h2>
-          {userType === "S"
-            ? "Take Mock Test"
+          { userType === "S" && passedLessons[classId]?.size !== lessons.length
+            ? "Mock Test 🔒" :
+            userType === "S"
+            ? "Mock Test"
             : userType === "T"
             ? "View Mock Test"
             : hasMocktest

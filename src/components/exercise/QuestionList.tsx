@@ -1,30 +1,38 @@
+import React from "react";
 import QuestionCard from "./QuestionCard";
 
 interface QuestionListProps {
   questions: {
-    number: number;
+    id: number;
     question: string;
-    choices: string[];
+    choiceA: string;
+    choiceB: string;
+    choiceC: string;
+    choiceD: string;
   }[];
   onAnswerChange: (questionNumber: number, selectedChoice: string) => void;
   answers: { [key: number]: string | null };
 }
 
 function QuestionList({
-  questions,
+  questions = [],
   onAnswerChange,
   answers,
-}: QuestionListProps) {
+}: Readonly<QuestionListProps>) {
   return (
     <div>
-      {questions.map((q) => (
+      {questions.map((q, index) => (
         <QuestionCard
-          key={q.number}
-          number={q.number}
+          key={q.id}
+          id={q.id}
+          displayNumber={index + 1}
           question={q.question}
-          choices={q.choices}
+          choiceA={q.choiceA}
+          choiceB={q.choiceB}
+          choiceC={q.choiceC}
+          choiceD={q.choiceD}
           onAnswerChange={onAnswerChange}
-          selectedChoice={answers[q.number] || ""}
+          selectedChoice={answers[q.id] ?? ""}
         />
       ))}
     </div>

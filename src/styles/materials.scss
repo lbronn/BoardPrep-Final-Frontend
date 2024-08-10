@@ -163,29 +163,85 @@
 
 // ... Rest of your existing styles
 
-.exercise-btn {
-  background: #b62ab9;
-  color: white;
-  font-weight: bold;
-  border: none;
-  border-radius: 15px;
-  padding: 15px 50px;
-  font-size: 18px;
-  cursor: pointer;
-  display: block;
-  margin: 40px 0 0px;
-  transition:
+.buttons-container {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  
+  button {
+    background: #B62AB9;
+    color: #FFFFFF;
+    font-weight: bold;
+    border: none;
+    border-radius: 15px;
+    padding: 15px 50px;
+    font-size: 18px;
+    cursor: pointer;
+    transition:
     background-color 0.3s,
     color 0.3s,
     cursor 0.3s;
-  position: relative;
+    transition: all 0.3s ease;
+    margin-top: -20px;
+    margin-bottom: 25px;
+  }
 
-  &:hover {
-    background: #ffffff;
-    color: #b62ab9;
+  .exercise-btn {
+    margin-right: 7.5vh;
+
+    &:hover {
+      background: #FFFFFF;
+      color: #B62AB9;
+    }
+  
+    &.loading {
+      background: #B62AB9;
+      color: transparent;
+      cursor: default;
+      padding: 26.3px 40.7px;
+    }
+  
+    .loading-circle {
+      display: none;
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-top: 4px solid #B62AB9;
+      border-top-color: #FFFFFF;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      animation: spin 1s linear infinite;
+      transform: translate(-50%, -50%);
+    }
+  
+    &.loading .loading-circle {
+      display: block;
+    }
+  
+    @keyframes spin {
+      0% { transform: translate(-50%, -50%) rotate(0deg); }
+      100% { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+  }
+
+  .view-assessment-btn {
+    background-color: #FFFFFF;
+    color: #B62AB9;
+    margin-right: 10px;
+    opacity: 1;
+
+    &:disabled {
+      opacity: 0.5; 
+      background-color: #FFFFFF;
+      color: #B62AB9;
+      cursor: not-allowed;
+    }
+
+    &:hover {
+      background-color: #B62AB9;
+      color: #FFFFFF;
+    }
   }
 }
-
 .box-content {
   display: flex;
   flex-direction: column;
