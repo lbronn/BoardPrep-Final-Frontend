@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import axiosInstance from "../axiosInstance";
 import ReactPaginate from "react-paginate";
 import Syllabus from "./Syllabus";
 import LessonContent from "./Lessons";
 import ExerciseModal from "./exercise/ExerciseModal";
 import ScoreModal from "./exercise/ScoreModal";
+import ExerciseAssessmentModal from "./ExerciseAssessmentModal";
 import "../styles/materials.scss";
 import { useAppSelector } from "../redux/hooks";
 import { selectUser } from '../redux/slices/authSlice';
@@ -13,6 +15,11 @@ interface Page {
   id: string;
   page_number: number;
   content: string;
+}
+
+interface CourseData {
+  course_id: string;
+  hasMocktest: boolean;
 }
 
 interface Lesson {
@@ -46,6 +53,7 @@ interface Score {
   student: string;
   exerciseDateTaken: string;
   feedback: string;
+  hasFinished: boolean;
 }
 
 function Materials({ courseId }: MaterialsProps) {
@@ -56,16 +64,40 @@ function Materials({ courseId }: MaterialsProps) {
   const [isSyllabusCollapsed, setIsSyllabusCollapsed] = useState(false);
   const [takeExercise, setTakeExercise] = useState<boolean>(false);
   const [exerciseId, setExerciseId] = useState<string | null>(null);
+  const [exerciseQuestions, setExerciseQuestions] = useState<Question[]>([]);
   const [hasExistingQuestions, setHasExistingQuestions] = useState(false);
+  const [completedExercises, setCompletedExercises] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(false);
   const [lesson, setLesson] = useState<Lesson | undefined>(undefined);
-  const [exerciseQuestions, setExerciseQuestions] = useState<Question[]>([]);
+  const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
   const [scoreModalVisible, setScoreModalVisible] = useState(false);
-  const [scoreData, setScoreData] = useState<{ totalQuestions: number; score: number; studentName: string; student: string; exerciseDateTaken: string, feedback: string } | null>(null);
+  const [scoreData, setScoreData] = useState<Score | null>(null);
+  const [assessmentModalVisible, setAssessmentModalVisible] = useState(false);
   const user = useAppSelector(selectUser);
   const userType = user.token.type;
   const userID = user.token.id;
   const pageCount = pages.length > 0 ? Math.ceil(pages.length) : 0;
+
+  useEffect(() => {
+    const fetchCourseData = async () => {
+      try {
+        const response = await axiosInstance.get(`/courses/`);
+        const courseData: CourseData[] = response.data;
+        console.log(courseData);
+        const currentCourse = courseData.find((crs) => crs.course_id === courseId);
+        console.log(currentCourse);
+        if (currentCourse) {
+            setSelectedCourseId(currentCourse.course_id);
+        } else {
+            setSelectedCourseId(null);
+        }
+      } catch (error) {
+        console.error("Error fetching class data", error);
+      }
+    };
+
+    fetchCourseData();
+  }, []);
 
   useEffect(() => {
     const fetchSyllabusAndFirstLesson = async () => {
@@ -105,6 +137,34 @@ function Materials({ courseId }: MaterialsProps) {
     }
   }, [courseId]);
 
+  useEffect(() => {
+    const fetchExerciseScores = async () => {
+        try {
+            const scoresResponse = await axiosInstance.get(`/exercise-scores/`);
+            const exerciseScores = scoresResponse.data;
+
+            const exercisesResponse = await axiosInstance.get(`/exercises/`);
+            const exercises = exercisesResponse.data;
+
+            const passedLessonsSet = new Set<string>();
+            for (const score of exerciseScores) {
+                if (score.student === userID && score.score >= 12) {
+                    const matchingExercise = exercises.find((exercise: { exerciseID: any; lesson: string; }) => exercise.exerciseID === score.exercise_id);
+                    if (matchingExercise) {
+                        const lessonTest = matchingExercise.lesson;
+                        console.log('Lesson:', lessonTest);
+                        passedLessonsSet.add(lessonTest);
+                    }
+                }
+            }
+            setCompletedExercises(passedLessonsSet);
+        } catch (error) {
+            console.error('Error fetching exercise scores or exercises:', error);
+        }
+    };
+    fetchExerciseScores();
+  }, [userID]);
+
   const handleCheckboxChange = () => {
     setIsSyllabusCollapsed(!isSyllabusCollapsed);
   };
@@ -128,34 +188,6 @@ function Materials({ courseId }: MaterialsProps) {
     setCurrentPage(event.selected);
   };
 
-  const handleViewAssessment = async () => {
-    if (exerciseId) {
-      try {
-        const response = await axiosInstance.get(`/exercise-scores/`);
-        const exerciseScores: Score[] = response.data;
-        const relevantScoreData = exerciseScores.find(score => score.exercise_id === exerciseId);
-        console.log("Assessment Data:", exerciseScores);
-        console.log("Relevant Score Data:", relevantScoreData);
-        console.log(exerciseId);
-        if (relevantScoreData) {
-          setScoreData({
-            totalQuestions: relevantScoreData.totalQuestions,
-            score: relevantScoreData.score,
-            studentName: relevantScoreData.studentName,
-            student: relevantScoreData.student,
-            exerciseDateTaken: relevantScoreData.exerciseDateTaken,
-            feedback: relevantScoreData.feedback,
-          });
-          setScoreModalVisible(true);
-        } else {
-          console.error("No relevant exercise scores found.");
-        }
-      } catch (error) {
-        console.error("Error fetching assessment:", error);
-      }
-    }
-  };
-
   const handleTakeExercise = async (lesson_id: string) => {
     if (isLoading) return;
     setIsLoading(true);
@@ -171,17 +203,18 @@ function Materials({ courseId }: MaterialsProps) {
 
     if (foundLesson && foundLesson.pages.length > 0) {
       try {
-        const response = await axiosInstance.post(`/exercises/${lesson_id}/generate_questions/`, { page_id: foundLesson.pages[0].id, lesson_id: currentLesson });
+        console.log(userID);
+        const response = await axiosInstance.post(`/exercises/${lesson_id}/generate_questions/`, { page_id: foundLesson.pages[0].id, lesson_id: currentLesson, course_id: selectedCourseId, student_id: userID });
         const exerciseId = response.data.exercise_id;
         if (response.data.status === 'existing exercise') {
-          const questionsResponse = await axiosInstance.get(`/exercise-questions/${exerciseId}`);
+          const questionsResponse = await axiosInstance.get(`/exercise-questions/${exerciseId}`, { params: { student_id: userID } });
           setExerciseQuestions(questionsResponse.data);
           setHasExistingQuestions(true);
         } else {
           const newQuestions = response.data.questions;
           setExerciseQuestions(newQuestions);
           setHasExistingQuestions(false);
-          const questionsResponse = await axiosInstance.get(`/exercise-questions/${exerciseId}`);
+          const questionsResponse = await axiosInstance.get(`/exercise-questions/${exerciseId}`, { params: { student_id: userID } });
           setExerciseQuestions(questionsResponse.data);
         }
         setExerciseId(exerciseId);
@@ -201,11 +234,19 @@ function Materials({ courseId }: MaterialsProps) {
     setTakeExercise(false);
   };
 
-  const unlockNextLesson = (lessonId: string) => {
-    const nextLessonIndex = lessons.findIndex((lesson) => lesson.lesson_id === lessonId) + 1;
-    if (nextLessonIndex < lessons.length) {
-      setCurrentLesson(lessons[nextLessonIndex].lesson_id);
+  const handleScoreModalClose = () => {
+    setScoreModalVisible(false);
+    if (scoreData && scoreData.hasFinished) {
+        setHasExistingQuestions(true);
     }
+  };
+
+  const handleViewAssessment = () => {
+    setAssessmentModalVisible(true);
+  };
+
+  const handleAssessmentModalClose = () => {
+    setAssessmentModalVisible(false);
   };
 
   return (
@@ -246,32 +287,33 @@ function Materials({ courseId }: MaterialsProps) {
         </div>
         {userType === 'S' && pages.length > 0 && (
           <div className="buttons-container">
-            <button 
-              className={`view-assessment-btn ${!hasExistingQuestions ? 'disabled' : ''}`} 
-              onClick={hasExistingQuestions  ? handleViewAssessment : undefined}
-              disabled={!hasExistingQuestions }
-            >
-              View Assessment
-            </button>
+            {completedExercises.has(currentLesson as string) && (
+              <button
+                className="view-assessment-btn"
+                onClick={handleViewAssessment}
+              >
+                View Assessment
+              </button>
+            )}
             <button
               className={`exercise-btn ${isLoading ? 'loading' : ''}`}
               onClick={() => handleTakeExercise(pages[currentPage].id)}
               disabled={isLoading}
             >
-              {isLoading ? <div className="loading-circle"></div> : "Take Exercise"}
+              {isLoading ? <div className="loading-circle"></div> : (completedExercises.has(currentLesson as string) ? "Retake Exercise" : "Take Exercise")}
             </button>
           </div>
         )}
         {scoreModalVisible && scoreData && (
           <ScoreModal
-            closeModal={() => setScoreModalVisible(false)}
+            closeModal={handleScoreModalClose}
             score={{ total: scoreData.totalQuestions, actual: scoreData.score }}
             student={scoreData.student}
             studentName={scoreData.studentName}
+            studentID = {userID}
             exerciseDateTaken={scoreData.exerciseDateTaken}
             feedback={scoreData.feedback}
             lesson={lesson}
-            unlockNextLesson={unlockNextLesson}
           />
         )}
         {takeExercise && (
@@ -280,6 +322,12 @@ function Materials({ courseId }: MaterialsProps) {
             closeModal={closeTakeExercise}
             lesson={lesson}
             exerciseId={exerciseId}
+          />
+        )}
+        {assessmentModalVisible && (
+          <ExerciseAssessmentModal
+            closeModal={handleAssessmentModalClose}
+            studentID={userID}
           />
         )}
       </div>

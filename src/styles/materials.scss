@@ -188,6 +188,7 @@
 
   .exercise-btn {
     margin-right: 7.5vh;
+    position: relative;
 
     &:hover {
       background: #FFFFFF;
@@ -198,23 +199,23 @@
       background: #B62AB9;
       color: transparent;
       cursor: default;
-      padding: 26.3px 40.7px;
+      padding: 25px 110px;
     }
   
     .loading-circle {
-      display: none;
       border: 4px solid rgba(255, 255, 255, 0.3);
       border-top: 4px solid #B62AB9;
       border-top-color: #FFFFFF;
       border-radius: 50%;
-      width: 32px;
-      height: 32px;
+      width: 30px;
+      height: 30px;
       animation: spin 1s linear infinite;
       transform: translate(-50%, -50%);
     }
   
     &.loading .loading-circle {
       display: block;
+      position: absolute;
     }
   
     @keyframes spin {
@@ -227,14 +228,6 @@
     background-color: #FFFFFF;
     color: #B62AB9;
     margin-right: 10px;
-    opacity: 1;
-
-    &:disabled {
-      opacity: 0.5; 
-      background-color: #FFFFFF;
-      color: #B62AB9;
-      cursor: not-allowed;
-    }
 
     &:hover {
       background-color: #B62AB9;
@@ -242,6 +235,7 @@
     }
   }
 }
+
 .box-content {
   display: flex;
   flex-direction: column;

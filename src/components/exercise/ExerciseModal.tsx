@@ -150,33 +150,42 @@ const ExerciseModal: React.FC<ExerciseProps> = ({ closeModal, questions, lesson,
       score: actual,
       totalQuestions: total,
       exerciseDateTaken: dateTaken,
-      feedback: "annyeong",
+      feedback: "Hey",
       correct_answers: correctAnswersData,
       lesson_id: lesson?.lesson_id, 
       page_id: lesson?.pages[0]?.id, 
+      hasFinished: actual >= 12,
     };
 
-    try {
-      const response = await axiosInstance.post(`/exercise-scores/${exerciseId}/`, payload);
-      const { studentName } = response.data;
-      setScore({ total, actual }); 
+    if (actual >= 12) {
+      try {
+        const response = await axiosInstance.post(`/exercise-scores/${exerciseId}/`, payload);
+        const { studentName } = response.data;
+        setScore({ total, actual });
+        setShowScoreModal(true);
+        setStudentName(studentName);
+        setExerciseDateTaken(dateTaken);
+        setFeedbackMessage("Great job! You passed the exercise.");
+        console.log(feedbackMessage);
+      } catch (error: any) {
+        if (error.response && error.response.status === 400 && error.response.data.error === 'A higher or equal score already exists.') {
+          setFeedbackMessage("A higher or equal score already exists. Your score has not been updated.");
+        } else {
+            console.error("Error submitting score:", error);
+        }
+      }
+    } else {
+      setScore({ total, actual });
       setShowScoreModal(true);
-      setStudentName(studentName);
+      setStudentName(user.token.id);
       setExerciseDateTaken(dateTaken);
-      setFeedbackMessage(feedbackMessage);
-      console.log(feedbackMessage);
-    } catch (error) {
-      console.error("Error submitting score:", error);
+      setFeedbackMessage("Unfortunately, you didn't pass the exercise.");
     }
   };
 
   const closeScoreModal = () => {
     setShowScoreModal(false);
     closeModal();
-  };
-
-  const unlockNextLesson = () => {
-    console.log("Next lesson unlocked!");
   };
 
   return (
@@ -208,8 +217,8 @@ const ExerciseModal: React.FC<ExerciseProps> = ({ closeModal, questions, lesson,
           lesson={lesson} 
           correctAnswers={correctAnswers} 
           studentName={studentName} 
+          studentID = {userID}
           exerciseDateTaken={exerciseDateTaken}
-          unlockNextLesson={unlockNextLesson}
         />
       )}
     </div>

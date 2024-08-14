@@ -4,7 +4,6 @@ import "../styles/syllabus.scss";
 import { useAppSelector } from "../redux/hooks";
 import { selectUser } from "../redux/slices/authSlice";
 import axiosInstance from "../axiosInstance";
-import ScoreModal from "./exercise/ScoreModal";
 
 interface Lessons {
   order: number;
@@ -53,13 +52,6 @@ function Syllabus({ syllabus = [], lessons, onLessonClick }: SyllabusProps) {
   console.log(classPath.split("/")[2]);
   const classId = classPath.split("/")[2];
 
-  const unlockNextLesson = (lessonId: string) => {
-    setPassedLessons(prev => ({
-      ...prev,
-      [classId]: new Set([...(prev[classId] ? Array.from(prev[classId]) : []), lessonId])
-    }));
-  };
-
   const onClickMockTest = () => {
     const path = userType === 'S' || userType === 'T' ? `/classes/${classId}/mocktest/${courseIdForUser}` : `/courses/${courseId}/mocktest/create`;
     navigate(path);
@@ -67,6 +59,10 @@ function Syllabus({ syllabus = [], lessons, onLessonClick }: SyllabusProps) {
 
   const onClickViewMockTest = () => {
     navigate(`/courses/${courseId}/mocktest`);
+  };
+
+  const isLessonUnlocked = (index: number) => {
+    return index === 0 || (passedLessons[classId]?.has(lessons[index - 1].lesson_id) || false);
   };
 
   const fetchLessonContent = async (lessonId: string) => {
@@ -81,7 +77,7 @@ function Syllabus({ syllabus = [], lessons, onLessonClick }: SyllabusProps) {
       const response = await axiosInstance.get(`/pages/${lessonId}/1`);
       const newContent = response.data.content;
       setCurrentLessonContent(newContent);
-      setFetchedContents({ ...fetchedContents, [lessonId]: newContent });
+      setFetchedContents((prev) => ({ ...prev, [lessonId]: newContent }));
       onLessonClick(newContent);
     } catch (error: any) {
       if (error.response && error.response.status === 404) {
@@ -110,7 +106,7 @@ function Syllabus({ syllabus = [], lessons, onLessonClick }: SyllabusProps) {
 
             const passedLessonsSet = new Set<string>();
             for (const score of exerciseScores) {
-                if (score.student === userID && score.score >= 10) {
+                if (score.student === userID && score.score >= 12) {
                     const matchingExercise = exercises.find((exercise: { exerciseID: any; lesson: string; }) => exercise.exerciseID === score.exercise_id);
                     if (matchingExercise) {
                         const lessonTest = matchingExercise.lesson;
@@ -125,6 +121,7 @@ function Syllabus({ syllabus = [], lessons, onLessonClick }: SyllabusProps) {
               ...prev,
               [classId]: passedLessonsSet,
             }));
+
         } catch (error) {
             console.error('Error fetching exercise scores or exercises:', error);
         }
@@ -180,10 +177,6 @@ function Syllabus({ syllabus = [], lessons, onLessonClick }: SyllabusProps) {
     fetchCourseData();
   }, []);
 
-  const isLessonUnlocked = (index: number) => {
-    return index === 0 || (passedLessons[classId]?.has(lessons[index - 1]?.lesson_id));
-  };
-
   return (
     <div className="syllabus-container">
       {lessons.map((lesson, index) => (
@@ -191,11 +184,10 @@ function Syllabus({ syllabus = [], lessons, onLessonClick }: SyllabusProps) {
           key={lesson.lesson_id}
           className={`title-container ${userType === "S" && !isLessonUnlocked(index) ? "locked" : ""}`}
           onClick={userType !== "S" || isLessonUnlocked(index) ? () => onLessonClick(lesson.lesson_id) : undefined}
-          role="button"
           tabIndex={0}
         >
           <h2>{lesson.lesson_title}
-            {userType === "S" && !isLessonUnlocked(index) && ' 🔒'}
+            {userType === "S" && !isLessonUnlocked(index) && " 🔒"}
           </h2>
         </div>
       ))}

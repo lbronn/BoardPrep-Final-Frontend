@@ -130,7 +130,7 @@ header {
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.4);
-  z-index: 10000;
+  z-index: 10001;
 }
 
 .modal-content {
@@ -190,6 +190,39 @@ header {
 
 .title {
   color:#0d0b1c;
+}
+
+.correct-answers {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  z-index: 10000;
+}
+
+.loading-circle {
+  border: 16px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top: 4px solid #B62AB9;
+  border-top-color: #FFFFFF;
+  width: 120px;
+  height: 120px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 //Esa editing...
