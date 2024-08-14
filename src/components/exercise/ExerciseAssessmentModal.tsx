@@ -14,10 +14,10 @@ import {
   LineController,
   BarController,
 } from "chart.js";
-import axiosInstance from '../../axiosInstance';  
+import axiosInstance from "../../axiosInstance";
 import "../../styles/studentperformancemodal.scss";
 import { useAppSelector } from "../../redux/hooks";
-import { selectUser } from '../../redux/slices/authSlice';
+import { selectUser } from "../../redux/slices/authSlice";
 
 ChartJS.register(
   Title,
@@ -30,7 +30,7 @@ ChartJS.register(
   Tooltip,
   Legend,
   LineController,
-  BarController
+  BarController,
 );
 
 interface CorrectAnswer {
@@ -52,41 +52,71 @@ interface AssessmentData {
 interface AssessmentModalProps {
   closeModal: () => void;
   studentID?: string;
+  lesson?: string | null;
 }
 
-function ExerciseAssessmentModal({ closeModal, studentID }: AssessmentModalProps) {
-  const [assessmentData, setAssessmentData] = useState<AssessmentData | null>(null);
+function ExerciseAssessmentModal({
+  closeModal,
+  studentID,
+  lesson,
+}: AssessmentModalProps) {
+  const [assessmentData, setAssessmentData] = useState<AssessmentData | null>(
+    null,
+  );
   const user = useAppSelector(selectUser);
   const userID = user.token.id;
+
+  const congrats =
+    "Congratulations on successfully passing the exercise! Your hard work and dedication truly paid off, demonstrating your strong skills and understanding. Keep up the excellent work as you continue to tackle new challenges!";
 
   useEffect(() => {
     const fetchAssessmentData = async () => {
       if (studentID) {
         try {
           console.log("Fetching assessment data for student:", studentID);
+          const { data } = await axiosInstance.get(`/exercises`);
+          let exerciseId: string = "";
+
+          for (let elem of data) {
+            if (elem.lesson === lesson) {
+              exerciseId = elem.exerciseID;
+              break;
+            }
+          }
+
+          console.log("mao ni exercise id: ", exerciseId);
+
           const scoresResponse = await axiosInstance.get(`/exercise-scores/`, {
-            params: { student_id: studentID }
+            params: { student_id: studentID },
           });
           const exerciseScores = scoresResponse.data;
-          console.log('Exercise Scores:', exerciseScores);
-          const highestScore = exerciseScores.sort((a: any, b: any) => b.score - a.score)[0];
+          console.log("Exercise Scores:", exerciseScores);
 
-          if (highestScore) {
-            console.log("Highest score found:", highestScore);
-            const correctAnswersResponse = await axiosInstance.get(`/exercise-questions/${highestScore.exercise_id}/`, {
-              params: { student_id: studentID }
-            });
+          const score = exerciseScores.find(
+            (obj: any) => obj.exercise_id === exerciseId,
+          );
+
+          console.log("mao nani iya score", score);
+
+          if (score) {
+            console.log("score found:", score);
+            const correctAnswersResponse = await axiosInstance.get(
+              `/exercise-questions/${score.exercise_id}/`,
+              {
+                params: { student_id: studentID },
+              },
+            );
             const correctAnswers: CorrectAnswer[] = correctAnswersResponse.data;
 
             console.log("Correct Answers fetched:", correctAnswers);
 
             setAssessmentData({
-              score: highestScore.score,
-              totalQuestions: highestScore.totalQuestions,
+              score: score.score,
+              totalQuestions: score.totalQuestions,
               correctAnswers,
-              studentName: highestScore.studentName,
-              exerciseDateTaken: highestScore.exerciseDateTaken,
-              feedback: highestScore.feedback,
+              studentName: score.studentName,
+              exerciseDateTaken: score.exerciseDateTaken,
+              feedback: score.feedback,
             });
           } else {
             console.log("No exercise data found for this student.");
@@ -110,10 +140,12 @@ function ExerciseAssessmentModal({ closeModal, studentID }: AssessmentModalProps
   const scoreData = {
     datasets: [
       {
-        data: assessmentData ? [
-          assessmentData.score,
-          assessmentData.totalQuestions - assessmentData.score,
-        ] : [0, 0],
+        data: assessmentData
+          ? [
+              assessmentData.score,
+              assessmentData.totalQuestions - assessmentData.score,
+            ]
+          : [0, 0],
         backgroundColor: ["rgba(182, 80, 244, 1)", "#626b77"],
         borderColor: ["rgba(182, 80, 244, 1)", "#626b77"],
         cutout: "85%",
@@ -163,6 +195,7 @@ function ExerciseAssessmentModal({ closeModal, studentID }: AssessmentModalProps
       }
     },
   };
+  console.log("mao ni iya feedback", assessmentData?.feedback);
 
   const plugins = [centerTextPlugin];
 
@@ -196,12 +229,18 @@ function ExerciseAssessmentModal({ closeModal, studentID }: AssessmentModalProps
                   <Chart
                     type="bar"
                     data={{
-                      labels: assessmentData.correctAnswers.map((_, index) => `Q${index + 1}`),
+                      labels: assessmentData.correctAnswers.map(
+                        (_, index) => `Q${index + 1}`,
+                      ),
                       datasets: [
                         {
                           type: "bar",
                           label: "Correct Answers",
-                          data: assessmentData.correctAnswers.map((answer) => answer.studentAnswer === answer.correctAnswer ? 1 : 0),
+                          data: assessmentData.correctAnswers.map((answer) =>
+                            answer.studentAnswer === answer.correctAnswer
+                              ? 1
+                              : 0,
+                          ),
                           backgroundColor: "rgba(54, 162, 235, 0.2)",
                           borderColor: "rgba(54, 162, 235, 1)",
                           borderWidth: 1,
@@ -242,14 +281,7 @@ function ExerciseAssessmentModal({ closeModal, studentID }: AssessmentModalProps
             <div className="group group3">
               <h2 className="title">Feedback</h2>
               <br />
-              <div className="feedback">
-                {assessmentData.feedback.split("\n").map((line, index) => (
-                  <span key={index}>
-                    {line}
-                    <br />
-                  </span>
-                ))}
-              </div>
+              <div className="feedback">{congrats}</div>
             </div>
           </div>
         ) : (
