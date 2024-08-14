@@ -6,7 +6,7 @@ import Syllabus from "./Syllabus";
 import LessonContent from "./Lessons";
 import ExerciseModal from "./exercise/ExerciseModal";
 import ScoreModal from "./exercise/ScoreModal";
-import ExerciseAssessmentModal from "./ExerciseAssessmentModal";
+import ExerciseAssessmentModal from "./exercise/ExerciseAssessmentModal";
 import "../styles/materials.scss";
 import { useAppSelector } from "../redux/hooks";
 import { selectUser } from '../redux/slices/authSlice';

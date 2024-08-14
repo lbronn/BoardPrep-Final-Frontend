@@ -14,10 +14,10 @@ import {
   LineController,
   BarController,
 } from "chart.js";
-import axiosInstance from '../axiosInstance';
+import axiosInstance from '../../axiosInstance';  
 import "../styles/studentperformancemodal.scss";
-import { useAppSelector } from "../redux/hooks";
-import { selectUser } from '../redux/slices/authSlice';
+import { useAppSelector } from "../../redux/hooks";
+import { selectUser } from '../../redux/slices/authSlice';
 
 ChartJS.register(
   Title,
