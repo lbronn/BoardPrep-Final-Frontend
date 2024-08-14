@@ -15,7 +15,7 @@ import {
   BarController,
 } from "chart.js";
 import axiosInstance from '../../axiosInstance';  
-import "../styles/studentperformancemodal.scss";
+import "../../styles/studentperformancemodal.scss";
 import { useAppSelector } from "../../redux/hooks";
 import { selectUser } from '../../redux/slices/authSlice';
 

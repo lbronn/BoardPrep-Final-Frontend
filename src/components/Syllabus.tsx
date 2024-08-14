@@ -177,6 +177,8 @@ function Syllabus({ syllabus = [], lessons, onLessonClick }: SyllabusProps) {
     fetchCourseData();
   }, []);
 
+  console.log(lessons.length);
+
   return (
     <div className="syllabus-container">
       {lessons.map((lesson, index) => (
@@ -192,12 +194,12 @@ function Syllabus({ syllabus = [], lessons, onLessonClick }: SyllabusProps) {
         </div>
       ))}
       <div 
-        className={`title-container ${userType === "S" && passedLessons[classId]?.size !== lessons.length ? "locked" : ""}`}
+        className={`title-container ${userType === "S" && !isLessonUnlocked(lessons.length) ? "locked" : ""}`}
         tabIndex={0}
-        onClick={userType !== "S" || passedLessons[classId]?.size === lessons.length ? onClickMockTest : undefined}
+        onClick={userType !== "S" || isLessonUnlocked(lessons.length) ? onClickMockTest : undefined}
       >
         <h2>
-          { userType === "S" && passedLessons[classId]?.size !== lessons.length
+          { userType === "S" && !isLessonUnlocked(lessons.length)
             ? "Mock Test 🔒" :
             userType === "S"
             ? "Mock Test"
