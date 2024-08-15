@@ -224,59 +224,6 @@ function ExerciseAssessmentModal({
                   <span>Date Taken: {assessmentData.exerciseDateTaken}</span>
                 </div>
               </div>
-              <div className="group group2">
-                <div style={{ width: "500px", height: "250px" }}>
-                  <Chart
-                    type="bar"
-                    data={{
-                      labels: assessmentData.correctAnswers.map(
-                        (_, index) => `Q${index + 1}`,
-                      ),
-                      datasets: [
-                        {
-                          type: "bar",
-                          label: "Correct Answers",
-                          data: assessmentData.correctAnswers.map((answer) =>
-                            answer.studentAnswer === answer.correctAnswer
-                              ? 1
-                              : 0,
-                          ),
-                          backgroundColor: "rgba(54, 162, 235, 0.2)",
-                          borderColor: "rgba(54, 162, 235, 1)",
-                          borderWidth: 1,
-                        },
-                      ],
-                    }}
-                    options={{
-                      scales: {
-                        x: {
-                          ticks: {
-                            color: "white",
-                          },
-                          grid: {
-                            color: "rgba(255, 255, 255, 0.1)",
-                          },
-                        },
-                        y: {
-                          ticks: {
-                            color: "white",
-                          },
-                          grid: {
-                            color: "rgba(255, 255, 255, 0.1)",
-                          },
-                        },
-                      },
-                      plugins: {
-                        legend: {
-                          labels: {
-                            color: "white",
-                          },
-                        },
-                      },
-                    }}
-                  />
-                </div>
-              </div>
             </div>
             <div className="group group3">
               <h2 className="title">Feedback</h2>
