@@ -9,7 +9,7 @@ import ScoreModal from "./exercise/ScoreModal";
 import ExerciseAssessmentModal from "./exercise/ExerciseAssessmentModal";
 import "../styles/materials.scss";
 import { useAppSelector } from "../redux/hooks";
-import { selectUser } from '../redux/slices/authSlice';
+import { selectUser } from "../redux/slices/authSlice";
 
 interface Page {
   id: string;
@@ -66,7 +66,9 @@ function Materials({ courseId }: MaterialsProps) {
   const [exerciseId, setExerciseId] = useState<string | null>(null);
   const [exerciseQuestions, setExerciseQuestions] = useState<Question[]>([]);
   const [hasExistingQuestions, setHasExistingQuestions] = useState(false);
-  const [completedExercises, setCompletedExercises] = useState<Set<string>>(new Set());
+  const [completedExercises, setCompletedExercises] = useState<Set<string>>(
+    new Set(),
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [lesson, setLesson] = useState<Lesson | undefined>(undefined);
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
@@ -84,12 +86,14 @@ function Materials({ courseId }: MaterialsProps) {
         const response = await axiosInstance.get(`/courses/`);
         const courseData: CourseData[] = response.data;
         console.log(courseData);
-        const currentCourse = courseData.find((crs) => crs.course_id === courseId);
+        const currentCourse = courseData.find(
+          (crs) => crs.course_id === courseId,
+        );
         console.log(currentCourse);
         if (currentCourse) {
-            setSelectedCourseId(currentCourse.course_id);
+          setSelectedCourseId(currentCourse.course_id);
         } else {
-            setSelectedCourseId(null);
+          setSelectedCourseId(null);
         }
       } catch (error) {
         console.error("Error fetching class data", error);
@@ -102,7 +106,9 @@ function Materials({ courseId }: MaterialsProps) {
   useEffect(() => {
     const fetchSyllabusAndFirstLesson = async () => {
       try {
-        const syllabusResponse = await axiosInstance.get(`/syllabi/${courseId}/`);
+        const syllabusResponse = await axiosInstance.get(
+          `/syllabi/${courseId}/`,
+        );
         const syllabusData = syllabusResponse.data[0];
         setLessons(syllabusData.lessons);
 
@@ -139,28 +145,31 @@ function Materials({ courseId }: MaterialsProps) {
 
   useEffect(() => {
     const fetchExerciseScores = async () => {
-        try {
-            const scoresResponse = await axiosInstance.get(`/exercise-scores/`);
-            const exerciseScores = scoresResponse.data;
+      try {
+        const scoresResponse = await axiosInstance.get(`/exercise-scores/`);
+        const exerciseScores = scoresResponse.data;
 
-            const exercisesResponse = await axiosInstance.get(`/exercises/`);
-            const exercises = exercisesResponse.data;
+        const exercisesResponse = await axiosInstance.get(`/exercises/`);
+        const exercises = exercisesResponse.data;
 
-            const passedLessonsSet = new Set<string>();
-            for (const score of exerciseScores) {
-                if (score.student === userID && score.score >= 12) {
-                    const matchingExercise = exercises.find((exercise: { exerciseID: any; lesson: string; }) => exercise.exerciseID === score.exercise_id);
-                    if (matchingExercise) {
-                        const lessonTest = matchingExercise.lesson;
-                        console.log('Lesson:', lessonTest);
-                        passedLessonsSet.add(lessonTest);
-                    }
-                }
+        const passedLessonsSet = new Set<string>();
+        for (const score of exerciseScores) {
+          if (score.student === userID && score.score >= 12) {
+            const matchingExercise = exercises.find(
+              (exercise: { exerciseID: any; lesson: string }) =>
+                exercise.exerciseID === score.exercise_id,
+            );
+            if (matchingExercise) {
+              const lessonTest = matchingExercise.lesson;
+              console.log("Lesson:", lessonTest);
+              passedLessonsSet.add(lessonTest);
             }
-            setCompletedExercises(passedLessonsSet);
-        } catch (error) {
-            console.error('Error fetching exercise scores or exercises:', error);
+          }
         }
+        setCompletedExercises(passedLessonsSet);
+      } catch (error) {
+        console.error("Error fetching exercise scores or exercises:", error);
+      }
     };
     fetchExerciseScores();
   }, [userID]);
@@ -191,7 +200,9 @@ function Materials({ courseId }: MaterialsProps) {
   const handleTakeExercise = async (lesson_id: string) => {
     if (isLoading) return;
     setIsLoading(true);
-    const foundLesson = lessons.find((lesson) => lesson.lesson_id === currentLesson);
+    const foundLesson = lessons.find(
+      (lesson) => lesson.lesson_id === currentLesson,
+    );
     if (foundLesson) {
       setLesson(foundLesson);
     } else {
@@ -204,17 +215,31 @@ function Materials({ courseId }: MaterialsProps) {
     if (foundLesson && foundLesson.pages.length > 0) {
       try {
         console.log(userID);
-        const response = await axiosInstance.post(`/exercises/${lesson_id}/generate_questions/`, { page_id: foundLesson.pages[0].id, lesson_id: currentLesson, course_id: selectedCourseId, student_id: userID });
+        const response = await axiosInstance.post(
+          `/exercises/${lesson_id}/generate_questions/`,
+          {
+            page_id: foundLesson.pages[0].id,
+            lesson_id: currentLesson,
+            course_id: selectedCourseId,
+            student_id: userID,
+          },
+        );
         const exerciseId = response.data.exercise_id;
-        if (response.data.status === 'existing exercise') {
-          const questionsResponse = await axiosInstance.get(`/exercise-questions/${exerciseId}`, { params: { student_id: userID } });
+        if (response.data.status === "existing exercise") {
+          const questionsResponse = await axiosInstance.get(
+            `/exercise-questions/${exerciseId}`,
+            { params: { student_id: userID } },
+          );
           setExerciseQuestions(questionsResponse.data);
           setHasExistingQuestions(true);
         } else {
           const newQuestions = response.data.questions;
           setExerciseQuestions(newQuestions);
           setHasExistingQuestions(false);
-          const questionsResponse = await axiosInstance.get(`/exercise-questions/${exerciseId}`, { params: { student_id: userID } });
+          const questionsResponse = await axiosInstance.get(
+            `/exercise-questions/${exerciseId}`,
+            { params: { student_id: userID } },
+          );
           setExerciseQuestions(questionsResponse.data);
         }
         setExerciseId(exerciseId);
@@ -237,7 +262,7 @@ function Materials({ courseId }: MaterialsProps) {
   const handleScoreModalClose = () => {
     setScoreModalVisible(false);
     if (scoreData && scoreData.hasFinished) {
-        setHasExistingQuestions(true);
+      setHasExistingQuestions(true);
     }
   };
 
@@ -264,14 +289,17 @@ function Materials({ courseId }: MaterialsProps) {
         <div className="bars" id="bar3"></div>
       </label>
 
-      <div className={`syllabus-main ${isSyllabusCollapsed ? "collapsed" : ""}`}>
+      <div
+        className={`syllabus-main ${isSyllabusCollapsed ? "collapsed" : ""}`}
+      >
         <Syllabus lessons={lessons} onLessonClick={handleLessonClick} />
       </div>
       <div className="box-content">
         <div className="lesson-content-container">
-          {pages.length > 0 && pages.map((page, index) => (
-            <LessonContent key={index} content={page.content} />
-          ))}
+          {pages.length > 0 &&
+            pages.map((page, index) => (
+              <LessonContent key={index} content={page.content} />
+            ))}
 
           {pageCount > 1 && (
             <ReactPaginate
@@ -285,7 +313,7 @@ function Materials({ courseId }: MaterialsProps) {
             />
           )}
         </div>
-        {userType === 'S' && pages.length > 0 && (
+        {userType === "S" && pages.length > 0 && (
           <div className="buttons-container">
             {completedExercises.has(currentLesson as string) && (
               <button
@@ -296,11 +324,17 @@ function Materials({ courseId }: MaterialsProps) {
               </button>
             )}
             <button
-              className={`exercise-btn ${isLoading ? 'loading' : ''}`}
+              className={`exercise-btn ${isLoading ? "loading" : ""}`}
               onClick={() => handleTakeExercise(pages[currentPage].id)}
               disabled={isLoading}
             >
-              {isLoading ? <div className="loading-circle"></div> : (completedExercises.has(currentLesson as string) ? "Retake Exercise" : "Take Exercise")}
+              {isLoading ? (
+                <div className="loading-circle"></div>
+              ) : completedExercises.has(currentLesson as string) ? (
+                "Retake Exercise"
+              ) : (
+                "Take Exercise"
+              )}
             </button>
           </div>
         )}
@@ -310,7 +344,7 @@ function Materials({ courseId }: MaterialsProps) {
             score={{ total: scoreData.totalQuestions, actual: scoreData.score }}
             student={scoreData.student}
             studentName={scoreData.studentName}
-            studentID = {userID}
+            studentID={userID}
             exerciseDateTaken={scoreData.exerciseDateTaken}
             feedback={scoreData.feedback}
             lesson={lesson}
@@ -328,6 +362,7 @@ function Materials({ courseId }: MaterialsProps) {
           <ExerciseAssessmentModal
             closeModal={handleAssessmentModalClose}
             studentID={userID}
+            lesson={currentLesson}
           />
         )}
       </div>
@@ -336,3 +371,4 @@ function Materials({ courseId }: MaterialsProps) {
 }
 
 export default Materials;
+
