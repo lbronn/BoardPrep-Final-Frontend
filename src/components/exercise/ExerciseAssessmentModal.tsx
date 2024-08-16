@@ -77,8 +77,11 @@ function ExerciseAssessmentModal({
           const { data } = await axiosInstance.get(`/exercises`);
           let exerciseId: string = "";
 
+          console.log("mao ni ang user", user);
+          console.log("mao ni mga exercises: ", data);
+
           for (let elem of data) {
-            if (elem.lesson === lesson) {
+            if (elem.lesson === lesson && elem.student === studentID) {
               exerciseId = elem.exerciseID;
               break;
             }
@@ -92,9 +95,12 @@ function ExerciseAssessmentModal({
           const exerciseScores = scoresResponse.data;
           console.log("Exercise Scores:", exerciseScores);
 
-          const score = exerciseScores.find(
-            (obj: any) => obj.exercise_id === exerciseId,
-          );
+          const score = exerciseScores.find((obj: any) => {
+            if(obj.exercise_id === exerciseId) return obj;
+          });
+
+          console.log("diri sata: ", score, user.token.id);
+          console.log("diara: ", exerciseId);
 
           console.log("mao nani iya score", score);
 
